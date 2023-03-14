@@ -37,9 +37,17 @@ router.get("/", (request, response) => {
 
 //Provide details for selected video
 router.get("/:id", (request, response) => {
-    console.log("Request received for specific video");
-    const videoId = request.params.id;
-    response.status(200).send(videosData.find((video) => video.id === videoId));
+    //Read file
+    readFile("./data/video-details.json", (err, data) => {
+        //Return error if read file failed
+        if (err) {
+            return response.send(err); //see what http error code to send***
+        }
+        //If no error, parse data from json file and send selected video
+        console.log("Request received for specific video");
+        const videoId = request.params.id;
+        response.status(200).json(JSON.parse(data).find((video) => video.id === videoId));
+    });
 });
 
 module.exports = router;
