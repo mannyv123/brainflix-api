@@ -3,7 +3,9 @@ const app = express();
 const cors = require("cors");
 const videoRoutes = require("./routes/videos");
 
-const port = 5001;
+// Configuration
+require("dotenv").config();
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors()); //allows sharing data / api calls between apps on different servers
@@ -13,6 +15,6 @@ app.use(express.json()); //allows access to incoming data posted to the server a
 // Routes
 app.use("/videos", videoRoutes);
 
-app.listen(port, () => {
-    console.log(`Express server listening on port ${port}`);
+app.listen(PORT, () => {
+    console.log(`Express server listening on port ${PORT}`);
 });
