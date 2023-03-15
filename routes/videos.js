@@ -50,4 +50,46 @@ router.get("/:id", (request, response) => {
     });
 });
 
+//Post new video
+router.post("/", (request, response) => {
+    //check if request blank**
+
+    //Read file to get latest data
+    readFile("./data/video-details.json", (err, data) => {
+        //Return error if read file failed
+        if (err) {
+            return response.send(err); //see what http error code to send***
+        }
+        //If no error, save data in variable; parse JSON data to convert to JS
+        const videoData = JSON.parse(data);
+        console.log(request.body);
+
+        //Create new video post
+        const newVideo = {
+            id: uuidv4(),
+            title: request.body.title,
+            channel: "Anonymous User",
+            image: "/images/Upload-video-preview.jpg",
+            description: request.body.description,
+            views: 0,
+            likes: 0,
+            duration: "1:01",
+            video: "https://project-2-api.herokuapp.com/stream",
+            timestamp: Date.now(),
+            comments: [],
+        };
+
+        //Push new video to videoData array
+        videoData.push(newVideo);
+
+        //Write updated videoData array to JSON file
+        writeFile("./data/video-details.json", videoData, (err) => {
+            if (err) {
+                return response.send(err); //see what http error code to send***
+            }
+            response.status(201).send(newVideo);
+        });
+    });
+});
+
 module.exports = router;
