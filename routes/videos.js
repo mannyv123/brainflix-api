@@ -52,7 +52,10 @@ router.get("/:id", (request, response) => {
 
 //Post new video
 router.post("/", (request, response) => {
-    //check if request blank**
+    //Check if request body is blank
+    if (request.body.title === "" || request.body.description === "") {
+        return response.status(400).send("Information cannot be blank");
+    }
 
     //Read file to get latest data
     readFile("./data/video-details.json", (err, data) => {
