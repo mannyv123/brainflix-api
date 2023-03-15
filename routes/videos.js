@@ -95,4 +95,39 @@ router.post("/", (request, response) => {
     });
 });
 
+//Post new comments
+router.post("/:videoId/comments", (request, response) => {
+    //check if request body is blank
+
+    //Read comments from data file
+    readFile("./data/video-details.json", (err, data) => {
+        if (err) {
+            return response.send(err); //see what http error code to send***
+        }
+        const videoId = request.params.videoId;
+        const videoData = JSON.parse(data); //.find((video) => videoId === video.id);
+        const index = videoData.findIndex((video) => video.id === videoId);
+
+        //Create new comment post
+        const newComment = {
+            id: uuidv4(),
+            name: "Anonymous User",
+            comment: request.body.comment,
+            likes: 0,
+            timestamp: Date.now(),
+        };
+
+        //Push new comment to the currentVideo
+        videoData[index].comments.push(newComment);
+
+        //Write updated videoData array to JSON file
+        writeFile("./data/video-details.json", videoData, (err) => {
+            if (err) {
+                return response.send(err); //see what http error code to send***
+            }
+            response.status(201).send(newComment);
+        });
+    });
+});
+
 module.exports = router;
