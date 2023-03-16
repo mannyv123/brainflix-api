@@ -2,7 +2,20 @@ const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid"); // Unique ID Generator
 const fs = require("fs"); // fileSystem module
-const videosData = require("../data/video-details.json");
+const multer = require("multer");
+// const videosData = require("../data/video-details.json");
+
+//Multer configuration
+const storage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, "public/images/");
+    },
+    filename: (req, file, callback) => {
+        callback(null, `${+Date.now()}-${file.originalname}`);
+    },
+    limits: { fieldSize: 10 * 1024 * 1024 },
+});
+const upload = multer({ storage });
 
 //function to read data file
 function readFile(file, callback) {
@@ -50,10 +63,12 @@ router.get("/:id", (request, response) => {
     });
 });
 
+//look into MIME types
 //Post new video
-router.post("/", (request, response) => {
+router.post("/", upload.single("file"), (request, response) => {
     //Check if request body is blank
     if (request.body.title === "" || request.body.description === "") {
+        //need to add validation for image file*****
         return response.status(400).send("Information cannot be blank");
     }
 
@@ -66,32 +81,34 @@ router.post("/", (request, response) => {
         //If no error, save data in variable; parse JSON data to convert to JS
         const videoData = JSON.parse(data);
         console.log(request.body);
-
+        console.log(request.file);
+        // console.log(request.file.filename);
+        // console.log(request.file.path);
         //Create new video post
-        const newVideo = {
-            id: uuidv4(),
-            title: request.body.title,
-            channel: "Anonymous User",
-            image: "/images/Upload-video-preview.jpg",
-            description: request.body.description,
-            views: 0,
-            likes: 0,
-            duration: "1:01",
-            video: "https://project-2-api.herokuapp.com/stream",
-            timestamp: Date.now(),
-            comments: [],
-        };
+        // const newVideo = {
+        //     id: uuidv4(),
+        //     title: request.body.title,
+        //     channel: "Anonymous User",
+        //     image: request.file.path,
+        //     description: request.body.description,
+        //     views: 0,
+        //     likes: 0,
+        //     duration: "1:01",
+        //     video: "https://project-2-api.herokuapp.com/stream",
+        //     timestamp: Date.now(),
+        //     comments: [],
+        // };
 
         //Push new video to videoData array
-        videoData.push(newVideo);
+        // videoData.push(newVideo);
 
         //Write updated videoData array to JSON file
-        writeFile("./data/video-details.json", videoData, (err) => {
-            if (err) {
-                return response.send(err); //see what http error code to send***
-            }
-            response.status(201).send(newVideo);
-        });
+        // writeFile("./data/video-details.json", videoData, (err) => {
+        //     if (err) {
+        //         return response.send(err); //see what http error code to send***
+        //     }
+        //     response.status(201).send(newVideo);
+        // });
     });
 });
 
