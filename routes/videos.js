@@ -99,7 +99,7 @@ router.post("/", (request, response) => {
 router.post("/:videoId/comments", (request, response) => {
     //check if request body is blank
 
-    //Read comments from data file
+    //Read video list data
     readFile("./data/video-details.json", (err, data) => {
         if (err) {
             return response.send(err); //see what http error code to send***
@@ -126,6 +126,35 @@ router.post("/:videoId/comments", (request, response) => {
                 return response.send(err); //see what http error code to send***
             }
             response.status(201).send(newComment);
+        });
+    });
+});
+
+//Delete comments
+router.delete("/:videoId/comments/:commentId", (request, response) => {
+    //Read video list data
+    readFile("./data/video-details.json", (err, data) => {
+        if (err) {
+            return response.send(err); //see what http error code to send***
+        }
+
+        // const videoId = request.params.videoId
+        // const commentId = request.params.commentId
+        const { videoId, commentId } = request.params;
+        const videoData = JSON.parse(data);
+
+        const videoIndex = videoData.findIndex((video) => video.id === videoId);
+        const commentIndex = videoData[videoIndex].comments.findIndex((comment) => comment.id === commentId);
+
+        //Delete comment
+        videoData[videoIndex].comments.splice(commentIndex, 1);
+
+        //Write updated videoData array to JSON file
+        writeFile("./data/video-details.json", videoData, (err) => {
+            if (err) {
+                return response.send(err); //see what http error code to send***
+            }
+            response.status(200).send("Comment Deleted"); // find the right http status code ****
         });
     });
 });
