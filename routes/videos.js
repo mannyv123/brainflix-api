@@ -80,35 +80,32 @@ router.post("/", upload.single("file"), (request, response) => {
         }
         //If no error, save data in variable; parse JSON data to convert to JS
         const videoData = JSON.parse(data);
-        console.log(request.body);
-        console.log(request.file);
-        // console.log(request.file.filename);
-        // console.log(request.file.path);
-        //Create new video post
-        // const newVideo = {
-        //     id: uuidv4(),
-        //     title: request.body.title,
-        //     channel: "Anonymous User",
-        //     image: request.file.path,
-        //     description: request.body.description,
-        //     views: 0,
-        //     likes: 0,
-        //     duration: "1:01",
-        //     video: "https://project-2-api.herokuapp.com/stream",
-        //     timestamp: Date.now(),
-        //     comments: [],
-        // };
+
+        // Create new video post
+        const newVideo = {
+            id: uuidv4(),
+            title: request.body.title,
+            channel: "Anonymous User",
+            image: `/images/${request.file.filename}`,
+            description: request.body.description,
+            views: 0,
+            likes: 0,
+            duration: "1:01",
+            video: "https://project-2-api.herokuapp.com/stream",
+            timestamp: Date.now(),
+            comments: [],
+        };
 
         //Push new video to videoData array
-        // videoData.push(newVideo);
+        videoData.push(newVideo);
 
         //Write updated videoData array to JSON file
-        // writeFile("./data/video-details.json", videoData, (err) => {
-        //     if (err) {
-        //         return response.send(err); //see what http error code to send***
-        //     }
-        //     response.status(201).send(newVideo);
-        // });
+        writeFile("./data/video-details.json", videoData, (err) => {
+            if (err) {
+                return response.send(err); //see what http error code to send***
+            }
+            response.status(201).send(newVideo);
+        });
     });
 });
 
