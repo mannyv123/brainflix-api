@@ -173,4 +173,34 @@ router.delete("/:videoId/comments/:commentId", (request, response) => {
     });
 });
 
+//Like Videos
+router.post("/:videoId/likes", (request, response) => {
+    //Read video list data
+    readFile("./data/video-details.json", (err, data) => {
+        if (err) {
+            return response.send(err); //see what http error code to send***
+        }
+        const { videoId } = request.params;
+        const videoData = JSON.parse(data);
+        const videoIndex = videoData.findIndex((video) => video.id === videoId);
+
+        //Increment like count
+        console.log(videoData[videoIndex].likes);
+        let likes = videoData[videoIndex].likes.split(",");
+        likes = likes.join("");
+        ++likes;
+        likes = likes.toLocaleString("en-US");
+        videoData[videoIndex].likes = likes;
+        console.log(videoData[videoIndex].likes);
+
+        //Write updated videoData array to JSON file
+        writeFile("./data/video-details.json", videoData, (err) => {
+            if (err) {
+                return response.send(err); //see what http error code to send***
+            }
+            response.status(200).send("video liked"); //find the right http status code***
+        });
+    });
+});
+
 module.exports = router;
