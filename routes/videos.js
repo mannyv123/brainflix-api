@@ -186,8 +186,14 @@ router.post("/:videoId/likes", (request, response) => {
 
         //Increment like count
         console.log(videoData[videoIndex].likes);
-        let likes = videoData[videoIndex].likes.split(",");
-        likes = likes.join("");
+        let likes = videoData[videoIndex].likes;
+        console.log(typeof likes);
+        if (typeof likes === "string") {
+            if (likes.includes(",")) {
+                likes = likes.split(",");
+                likes = likes.join("");
+            }
+        }
         ++likes;
         likes = likes.toLocaleString("en-US");
         videoData[videoIndex].likes = likes;
