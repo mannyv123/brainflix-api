@@ -32,7 +32,7 @@ router.get("/", (request, response) => {
     readFile("./data/video-details.json", (err, data) => {
         //Return error if read file failed
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
         //If no error, parse data from json file and send selected details
         response.status(200).json(
@@ -52,7 +52,7 @@ router.get("/:id", (request, response) => {
     readFile("./data/video-details.json", (err, data) => {
         //Return error if read file failed
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
         //If no error, parse data from json file and send selected video
         const videoId = request.params.id;
@@ -71,7 +71,7 @@ router.post("/", upload.single("file"), (request, response) => {
     readFile("./data/video-details.json", (err, data) => {
         //Return error if read file failed
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
         //If no error, save data in variable; parse JSON data to convert to JS
         const videoData = JSON.parse(data);
@@ -97,7 +97,7 @@ router.post("/", upload.single("file"), (request, response) => {
         //Write updated videoData array to JSON file
         writeFile("./data/video-details.json", videoData, (err) => {
             if (err) {
-                return response.send(err); //see what http error code to send***
+                return response.status(500).send(err);
             }
             response.status(201).send(newVideo);
         });
@@ -106,15 +106,17 @@ router.post("/", upload.single("file"), (request, response) => {
 
 //Post new comments
 router.post("/:videoId/comments", (request, response) => {
-    //check if request body is blank
-
-    //Read video list data
+    //Check if request body is blank
+    if (request.body.comment === "") {
+        return response.status(400).send("Information cannot be missing");
+    }
+    //If no error, read video list data
     readFile("./data/video-details.json", (err, data) => {
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
         const videoId = request.params.videoId;
-        const videoData = JSON.parse(data); //.find((video) => videoId === video.id);
+        const videoData = JSON.parse(data);
         const index = videoData.findIndex((video) => video.id === videoId);
 
         //Create new comment post
@@ -132,7 +134,7 @@ router.post("/:videoId/comments", (request, response) => {
         //Write updated videoData array to JSON file
         writeFile("./data/video-details.json", videoData, (err) => {
             if (err) {
-                return response.send(err); //see what http error code to send***
+                return response.status(500).send(err);
             }
             response.status(201).send(newComment);
         });
@@ -144,11 +146,9 @@ router.delete("/:videoId/comments/:commentId", (request, response) => {
     //Read video list data
     readFile("./data/video-details.json", (err, data) => {
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
 
-        // const videoId = request.params.videoId
-        // const commentId = request.params.commentId
         const { videoId, commentId } = request.params;
         const videoData = JSON.parse(data);
 
@@ -161,9 +161,9 @@ router.delete("/:videoId/comments/:commentId", (request, response) => {
         //Write updated videoData array to JSON file
         writeFile("./data/video-details.json", videoData, (err) => {
             if (err) {
-                return response.send(err); //see what http error code to send***
+                return response.status(500).send(err);
             }
-            response.status(200).send("Comment Deleted"); // find the right http status code ****
+            response.status(200).send("Comment Deleted");
         });
     });
 });
@@ -173,7 +173,7 @@ router.post("/:videoId/likes", (request, response) => {
     //Read video list data
     readFile("./data/video-details.json", (err, data) => {
         if (err) {
-            return response.send(err); //see what http error code to send***
+            return response.status(500).send(err);
         }
         const { videoId } = request.params;
         const videoData = JSON.parse(data);
@@ -196,9 +196,9 @@ router.post("/:videoId/likes", (request, response) => {
         //Write updated videoData array to JSON file
         writeFile("./data/video-details.json", videoData, (err) => {
             if (err) {
-                return response.send(err); //see what http error code to send***
+                return response.status(500).send(err);
             }
-            response.status(200).send("video liked"); //find the right http status code***
+            response.status(201).send("video liked");
         });
     });
 });
