@@ -3,9 +3,8 @@ const router = express.Router();
 const { v4: uuidv4 } = require("uuid"); // Unique ID Generator
 const fs = require("fs"); // fileSystem module
 const multer = require("multer");
-// const videosData = require("../data/video-details.json");
 
-//Multer configuration
+//Multer configuration; sets where to save images, filename to save images, limits image size
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, "public/images/");
@@ -36,7 +35,6 @@ router.get("/", (request, response) => {
             return response.send(err); //see what http error code to send***
         }
         //If no error, parse data from json file and send selected details
-        console.log("Request received for list");
         response.status(200).json(
             JSON.parse(data).map((video) => ({
                 id: video.id,
@@ -57,19 +55,16 @@ router.get("/:id", (request, response) => {
             return response.send(err); //see what http error code to send***
         }
         //If no error, parse data from json file and send selected video
-        console.log("Request received for specific video");
         const videoId = request.params.id;
         response.status(200).json(JSON.parse(data).find((video) => video.id === videoId));
     });
 });
 
-//look into MIME types
 //Post new video
 router.post("/", upload.single("file"), (request, response) => {
-    //Check if request body is blank
-    if (request.body.title === "" || request.body.description === "") {
-        //need to add validation for image file*****
-        return response.status(400).send("Information cannot be blank");
+    //Check if request body/file is blank
+    if (request.body.title === "" || request.body.description === "" || !request.file) {
+        return response.status(400).send("Information cannot be missing");
     }
 
     //Read file to get latest data
@@ -89,7 +84,7 @@ router.post("/", upload.single("file"), (request, response) => {
             image: `/images/${request.file.filename}`,
             description: request.body.description,
             views: 0,
-            likes: 0,
+            likes: "0",
             duration: "1:01",
             video: "https://project-2-api.herokuapp.com/stream",
             timestamp: Date.now(),
@@ -183,21 +178,20 @@ router.post("/:videoId/likes", (request, response) => {
         const { videoId } = request.params;
         const videoData = JSON.parse(data);
         const videoIndex = videoData.findIndex((video) => video.id === videoId);
-
-        //Increment like count
-        console.log(videoData[videoIndex].likes);
         let likes = videoData[videoIndex].likes;
-        console.log(typeof likes);
+
+        //Check if like count saved as string and convert to number
         if (typeof likes === "string") {
             if (likes.includes(",")) {
                 likes = likes.split(",");
                 likes = likes.join("");
             }
         }
+
+        //Increment like count
         ++likes;
         likes = likes.toLocaleString("en-US");
         videoData[videoIndex].likes = likes;
-        console.log(videoData[videoIndex].likes);
 
         //Write updated videoData array to JSON file
         writeFile("./data/video-details.json", videoData, (err) => {
