@@ -56,6 +56,11 @@ router.get("/:id", (request, response) => {
         }
         //If no error, parse data from json file and send selected video
         const videoId = request.params.id;
+
+        if (JSON.parse(data).find((video) => video.id === videoId) === undefined) {
+            return response.status(400).send("Video not found");
+        }
+
         response.status(200).json(JSON.parse(data).find((video) => video.id === videoId));
     });
 });
